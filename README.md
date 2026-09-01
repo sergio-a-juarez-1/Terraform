@@ -1,4 +1,4 @@
-# Cloud Infrastructure Deployment Engine (Terraform)
+# Terraform
 
 This repository contains **Terraform configuration modules** designed to provision, manage, and scale secure cloud infrastructure components safely and predictably using Infrastructure as Code (IaC).
 
