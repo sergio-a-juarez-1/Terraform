@@ -97,3 +97,45 @@ To promote this blueprint from your local `floci` container directly into your r
    ```
 Rerun `terraform apply` to cleanly construct the same resilient, self-healing layout on real cloud infrastructure.
 
+
+---
+
+# Tear Down & Workspace Clean Up Guide
+
+Follow these steps to cleanly dismantle your virtual infrastructure, purge the simulation containers, and wipe local workspace state directories.
+
+---
+
+### 1. Destroy Virtual Cloud Infrastructure
+Execute the standard declarative teardown sequence inside your `self-healing` directory to strip out every simulated VPC resource, group, and load balancer:
+
+```bash
+terraform destroy --auto-approve
+```
+
+---
+
+### 2. Purge the Floci Container Lifecycle
+Once the orchestrator finishes deleting the virtual components, remove the running backend microservice instance and its storage layer:
+
+```bash
+# Stop the active cloud engine container
+docker stop floci
+
+# Delete the container definition from disk
+docker rm floci
+
+# Remove the cached image asset to reclaim disk space (Optional)
+docker rmi floci/floci:latest
+```
+
+---
+
+### 3. Clear Local Caches & Architecture State Files
+To reset your local directory to a completely uninitialized sandbox state, drop the local plugins and resource registration trees:
+
+```bash
+# Remove tracking state, backup matrices, and downloaded provider binaries
+rm -rf .terraform/ .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
+```
+
