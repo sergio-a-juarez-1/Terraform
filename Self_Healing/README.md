@@ -1,141 +1,99 @@
-# AWS Self-Healing Infrastructure Architecture (Local Simulation)
+# Terraform Self-Healing Sandbox Environment (Killercoda-Style)
 
-A production-grade Terraform blueprint that implements an **Elastic Auto Scaling Group (ASG)** integrated with an **Application Load Balancer (ALB)**. 
+A production-grade, declarative Infrastructure-as-Code (IaC) configuration designed to provision ephemeral, self-healing sandbox environments on AWS. 
 
-This infrastructure-as-code pattern models high-availability cloud behaviors locally by routing cloud API hooks into **LocalStack / Floci** running inside isolated container networks. This enables zero-cost testing of architecture failures, auto-remediation loops, and local cluster validation.
+This architecture implements a strict, automated **2-hour session decay countdown** and an on-demand **manual reset command**, directly replicating the core user-experience flow of interactive cloud labs like Killercoda or Katacoda.
 
-## 🚀 Architectural Mechanics
-* **Elastic Load Balancing:** Provisions an Application Load Balancer to natively route incoming public network streams across distributed underlying machine instances.
-* **Proactive Eviction Detection:** Polls underlying web servers aggressively every 10 seconds. If a runtime daemon crashes or locks up, the platform tags the backend target group as unhealthy.
-* **Automated Remediation Loop:** The Auto Scaling Group dynamically tracks Load Balancer health hooks (`health_check_type = "ELB"`). The millisecond an application engine registers as dead, the cluster kills the virtual host and brings up a clean replica using the baseline Launch Template configuration.
-
----
-
-## 🔒 Security Design (Zero Hardcoded Secrets)
-This repository strictly follows DevSecOps compliance structures. The orchestration files contain **no plaintext access keys, secret tokens, or authenticating credentials**. 
-
-The local provider profile uses dummy parameters (`mock_key` / `mock_secret`) that are valid **only** against your local development container context loop and will instantly reject public cloud operations if executed externally.
+## 🚀 Key Features
+* **Automated Ephemeral Lifecycles:** Deploys a background system daemon (`atd`) during bootstrap initialization that automatically tears down, prunes dependencies, and reboots the system cleanly every 2 hours.
+* **Infinite Re-Queuing Loop:** Implements an automated operational safety layer that registers a fresh 2-hour self-healing timer upon reboot, ensuring the environment remains permanently ready for the next student session.
+* **On-Demand Manual Reset Shorthand:** Deploys a secure CLI helper utility (`reset-env`) into the system execution path, allowing users to instantly roll back a broken configuration manually.
+* **Dynamic Compute Provisioning:** Automatically queries and maps the newest stable Canonical Ubuntu Server 24.04 LTS release dynamically to ensure image parity across regional cloud boundaries.
+* **Hardened Privilege Separation:** Implements explicit, passwordless elevation scopes tailored specifically to the reset script pathway, preventing unprivileged users from misusing root system parameters.
 
 ---
 
-## 📂 Project Isolation & Setup
+## 📂 Project Isolation & Monorepo Setup
 
 ### 1. Isolate the Project via Sparse-Checkout
 To pull this specific tool out of your repository workspace without cluttering your system with your complete monorepo setup, open your terminal and run:
 
 ```bash
 # Initialize an empty local directory
-mkdir self-healing && cd self-healing
+mkdir Self_Healing && cd Self_Healing
 git init
 
 # Link your multi-project workspace as the remote engine
-git remote add origin https://github.com/sergio-a-juarez-1/Terraform
+git remote add origin https://github.com/sergio-a-juarez-1/Terraform.git
 
 # Enable sparse-checkout and pull the target server directory
 git sparse-checkout set Self_Healing
 git pull origin main
 ```
 
-## 🛠️ Requirements & Setup
-
-### 1. Fire Up the Mock Cloud Engine
-Launch your isolated local Amazon infrastructure simulation cluster using your native machine container engine wrapper:
-```bash
-docker run -d --name floci -p 4566:4566 floci/floci:latest
+### 2. File Structure
+Ensure your working directory matches this structure inside `Self_Healing/`:
+```text
+.
+├── main.tf        # Master resource maps, security definitions, and cloud-init routines
+├── variables.tf   # Infrastructure parameters, region mapping, and configuration handles
+├── outputs.tf     # Runtime status trackers and immediate deployment command connections
+└── README.md      # Platform documentation and execution runbooks
 ```
 
-### 2. Standard Workspace Provisioning
-Initialize your project tree to download the corresponding HashiCorp provider plugins, validate deployment topology, and apply changes:
+---
+
+## ⚡ Deployment & Execution
+
+### Prerequisites
+Before initializing the workspace infrastructure, ensure your local controller machine has the required binaries installed:
+1. **Terraform CLI** (v1.5.0+)
+2. **AWS CLI** configured with appropriate administrative programmatic access policies.
+
+### Run the Deployment Pipeline
+Initialize your working directory, validate configuration semantics, and execute the automated build chain:
+
 ```bash
-# Initialize local tracking extensions
+# Initialize backend tracking engines and download providers
 terraform init
 
-# Validate configuration blueprints
-terraform plan
+# Validate syntactic and structural structure integrity
+terraform validate
 
-# Apply infrastructure definitions
-terraform apply --auto-approve
+# Provision the cloud workspace infrastructure footprint
+terraform apply -var="key_name=your-aws-ssh-key-name" -auto-approve
 ```
 
 ---
 
-## 💥 Chaos Engineering & Self-Healing Verification
+## 🔒 Interactive Session Management & Controls
 
-To test the self-healing remediation systems without configuring native environment profiles, pass standard mock credentials directly inline to your local command interface chains:
+Once the build successfully completes, Terraform will automatically print your target access vectors to your terminal console interface.
 
-### A. List Active Compute Virtual Nodes
-Query the active architecture state to view your current baseline server allocation pool:
+### 1. Connecting to your Interactive Sandbox
+Log into your freshly provisioned, interactive training sandbox via standard SSH protocols:
 ```bash
-AWS_ACCESS_KEY_ID=mock AWS_SECRET_ACCESS_KEY=mock aws --endpoint-url=http://localhost:4566 ec2 describe-instances --region us-east-1 --query "Reservations[*].Instances[*].[InstanceId,State.Name]" --output table
+ssh ubuntu@<SANDBOX_PUBLIC_IP>
 ```
 
-### B. Force a Hardware Failure (Chaos Injection)
-Select one of the active `InstanceId` values returned from the table above and forcefully terminate it to simulate a localized failure:
+### 2. Inspecting Remaining Session Time
+Your active environment tracks how long the session has remaining before it executes an automated roll-back script. To view the active system countdown clock queue, run:
 ```bash
-AWS_ACCESS_KEY_ID=mock AWS_SECRET_ACCESS_KEY=mock aws --endpoint-url=http://localhost:4566 ec2 terminate-instances --region us-east-1 --instance-ids <TARGET_INSTANCE_ID>
+atq
 ```
 
-### C. Observe Automatic Remediation
-Wait roughly 15 seconds for the mock cloud monitoring checks to report back to the Auto Scaling engine, then review your cluster mapping again:
+### 3. Executing an On-Demand Manual Reset
+If you break a cluster configuration, run into a kernel lock, or corrupt essential learning packages, execute the custom platform shortcut anywhere inside the sandbox terminal:
 ```bash
-AWS_ACCESS_KEY_ID=mock AWS_SECRET_ACCESS_KEY=mock aws --endpoint-url=http://localhost:4566 ec2 describe-instances --region us-east-1 --query "Reservations[*].Instances[*].[InstanceId,State.Name]" --output table
+reset-env
 ```
-The architecture metrics will display your targeted instance heading into a `terminated` phase, while an entirely new, system-managed `InstanceId` automatically boots up in a `pending` state to preserve cluster baseline capacity.
+*The command will purge active session structures, clear out non-persistent Docker configurations, reschedule a fresh 2-hour expiration ticket, and cleanly reboot the node into a pristine baseline configuration state within seconds.*
 
 ---
 
-## 🌐 Moving to Real AWS (Production Migration)
-
-To promote this blueprint from your local `floci` container directly into your real production AWS cloud account, follow these two migration adjustments:
-
-1. **Remove the Mock Endpoints:** Open `main.tf` and delete or comment out the `endpoints {}` map block along with the `access_key` and `secret_key` declarations inside the provider declaration scope.
-2. **Authenticate with Cloud IAM:** Export your true cloud IAM access credentials or AWS SSO profiles in your desktop terminal:
-   ```bash
-   export AWS_ACCESS_KEY_ID="......"
-   export AWS_SECRET_ACCESS_KEY="......"
-   export AWS_DEFAULT_REGION="us-east-1"
-   ```
-Rerun `terraform apply` to cleanly construct the same resilient, self-healing layout on real cloud infrastructure.
-
-
----
-
-# Tear Down & Workspace Clean Up Guide
-
-Follow these steps to cleanly dismantle your virtual infrastructure, purge the simulation containers, and wipe local workspace state directories.
-
----
-
-### 1. Destroy Virtual Cloud Infrastructure
-Execute the standard declarative teardown sequence inside your `self-healing` directory to strip out every simulated VPC resource, group, and load balancer:
+## 🛟 Teardown & Permanent Destruction
+When your training iterations are completed and you need to completely remove the cloud instance footprints from your cloud profile provider, run:
 
 ```bash
-terraform destroy --auto-approve
+terraform destroy -var="key_name=your-aws-ssh-key-name" -auto-approve
 ```
-
----
-
-### 2. Purge the Floci Container Lifecycle
-Once the orchestrator finishes deleting the virtual components, remove the running backend microservice instance and its storage layer:
-
-```bash
-# Stop the active cloud engine container
-docker stop floci
-
-# Delete the container definition from disk
-docker rm floci
-
-# Remove the cached image asset to reclaim disk space (Optional)
-docker rmi floci/floci:latest
-```
-
----
-
-### 3. Clear Local Caches & Architecture State Files
-To reset your local directory to a completely uninitialized sandbox state, drop the local plugins and resource registration trees:
-
-```bash
-# Remove tracking state, backup matrices, and downloaded provider binaries
-rm -rf .terraform/ .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
-```
-
