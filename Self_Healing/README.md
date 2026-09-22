@@ -13,6 +13,15 @@ This architecture implements a strict, automated **2-hour session decay countdow
 
 ---
 
+## 🔒 Architectural Breakdown: Why "Self-Healing"?
+
+Unlike cloud-native scaling infrastructures that rely on heavy external load balancers and orchestrators to replace dead machines, this architecture utilizes **Local Node Self-Healing (In-Place Self-Remediation)**. The infrastructure automatically repairs state corruption and configuration drift through two distinct vectors:
+
+1. **User-Triggered Self-Healing (On-Demand):** If a user corrupts core networking components, breaks container stacks, or locks themselves out of a tool, they execute `reset-env`. The machine instantly wipes the altered runtime state and triggers an automated system remediation loop back to the pristine baseline.
+2. **Time-Triggered Self-Healing (Automated Fail-Safe):** If a user configures a destructive firewall rule, triggers a kernel panic, or breaks remote access channels entirely, human intervention is still not required. The independent, local system countdown clock acts as a cryptographic fuse that forces a full state purge and environment reboot automatically when the 2-hour threshold expires.
+
+---
+
 ## 📂 Project Isolation & Monorepo Setup
 
 ### 1. Isolate the Project via Sparse-Checkout
@@ -66,7 +75,7 @@ terraform apply -var="key_name=your-aws-ssh-key-name" -auto-approve
 
 ---
 
-## 🔒 Interactive Session Management & Controls
+## 🛠️ Interactive Session Management & Controls
 
 Once the build successfully completes, Terraform will automatically print your target access vectors to your terminal console interface.
 
